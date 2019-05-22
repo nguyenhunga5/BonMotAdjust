@@ -24,11 +24,11 @@ extension UIFont {
     /// Retrieve the text style, if it exists, from the font descriptor.
     @objc(bon_textStyle)
     public final var textStyle: BonMotTextStyle? {
-        guard let textStyle = fontDescriptor.fontAttributes[UIFontDescriptorTextStyleAttribute] as? String else {
+        guard let textStyle = convertFromUIFontDescriptorAttributeNameDictionary(fontDescriptor.fontAttributes)[convertFromUIFontDescriptorAttributeName(UIFontDescriptor.AttributeName.textStyle)] as? String else {
             return nil
         }
         #if swift(>=3.0)
-            return UIFontTextStyle(rawValue: textStyle)
+            return UIFont.TextStyle(rawValue: textStyle)
         #else
             return textStyle
         #endif
@@ -82,10 +82,25 @@ extension UIFont {
     /// - Returns: a font with the same attributes as the receiver, but with the
     ///            the specified name.
     final func fontWithSameAttributes(named name: String) -> UIFont {
-        let descriptor = fontDescriptor.addingAttributes([
-            UIFontDescriptorNameAttribute: name,
-            ])
+        let descriptor = fontDescriptor.addingAttributes(convertToUIFontDescriptorAttributeNameDictionary([
+            convertFromUIFontDescriptorAttributeName(UIFontDescriptor.AttributeName.name): name,
+            ]))
         return UIFont(descriptor: descriptor, size: pointSize)
     }
 
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertFromUIFontDescriptorAttributeNameDictionary(_ input: [UIFontDescriptor.AttributeName: Any]) -> [String: Any] {
+	return Dictionary(uniqueKeysWithValues: input.map {key, value in (key.rawValue, value)})
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertFromUIFontDescriptorAttributeName(_ input: UIFontDescriptor.AttributeName) -> String {
+	return input.rawValue
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertToUIFontDescriptorAttributeNameDictionary(_ input: [String: Any]) -> [UIFontDescriptor.AttributeName: Any] {
+	return Dictionary(uniqueKeysWithValues: input.map { key, value in (UIFontDescriptor.AttributeName(rawValue: key), value)})
 }

@@ -35,7 +35,7 @@ extension NSAttributedString {
                 replacementString = nil
             case .objectReplacementCharacter?:
                 #if os(iOS) || os(tvOS) || os(OSX)
-                    if let attachment = attribute(NSAttachmentAttributeName, at: index, effectiveRange: nil) as? NSTextAttachment, let image = attachment.image {
+                    if let attachment = attribute(NSAttributedString.Key.attachment, at: index, effectiveRange: nil) as? NSTextAttachment, let image = attachment.image {
                         replacementString = String(format: "image size='%.3gx%.3g'", image.size.width, image.size.height)
                     }
                     else {
@@ -90,4 +90,21 @@ extension NSAttributedString {
         return bonMotDebugAttributedString.string
     }
 
+    static func toStyleAttributes(attributes: [NSAttributedString.Key: Any]) -> StyleAttributes {
+        return attributes.reduce(StyleAttributes(), { (results, keyValue) in
+            let (key, value) = keyValue
+            var results = results
+            results[key.rawValue] = value
+            return results
+        })
+    }
+    
+    static func fromStyleAttributes(attributes: StyleAttributes) -> [NSAttributedString.Key: Any] {
+        return attributes.reduce([:], { (results, keyValue) in
+            let (key, value) = keyValue
+            var results = results
+            results[NSAttributedString.Key(key)] = value
+            return results
+        })
+    }
 }

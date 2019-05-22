@@ -41,7 +41,7 @@ extension UILabel {
 
         if let bonMotStyle = bonMotStyle {
             let attributes = NSAttributedString.adapt(attributes: bonMotStyle.attributes, to: traitCollection)
-            font = attributes[NSFontAttributeName] as? BONFont
+            font = attributes[convertFromNSAttributedStringKey(NSAttributedString.Key.font)] as? BONFont
         }
         if let attributedText = attributedText {
             self.attributedText = attributedText.adapted(to: traitCollection)
@@ -61,7 +61,7 @@ extension UITextView {
         if let attributedText = attributedText {
             self.attributedText = attributedText.adapted(to: traitCollection)
         }
-        typingAttributes = NSAttributedString.adapt(attributes: typingAttributes, to: traitCollection)
+        typingAttributes = convertToNSAttributedStringKeyDictionary(NSAttributedString.adapt(attributes: NSAttributedString.toStyleAttributes(attributes: typingAttributes), to: traitCollection))
     }
 
 }
@@ -81,14 +81,14 @@ extension UITextField {
     public func adaptText(forTraitCollection traitCollection: UITraitCollection) {
         if let attributedText = attributedText?.adapted(to: traitCollection) {
             if attributedText.length > 0 {
-                font = attributedText.attribute(NSFontAttributeName, at: 0, effectiveRange: nil) as? UIFont
+                font = attributedText.attribute(NSAttributedString.Key.font, at: 0, effectiveRange: nil) as? UIFont
             }
             self.attributedText = attributedText
         }
         if let attributedPlaceholder = attributedPlaceholder {
             self.attributedPlaceholder = attributedPlaceholder.adapted(to: traitCollection)
         }
-        defaultTextAttributes = NSAttributedString.adapt(attributes: defaultTextAttributes, to: traitCollection)
+        defaultTextAttributes = convertToNSAttributedStringKeyDictionary(NSAttributedString.adapt(attributes: NSAttributedString.toStyleAttributes(attributes: defaultTextAttributes), to: traitCollection))
         // Fix an issue where shrinking or growing text would stay the same width, but add whitespace.
         setNeedsDisplay()
     }
@@ -103,7 +103,7 @@ extension UIButton {
     /// - parameter traitCollection: The new trait collection.
     @objc(bon_updateTextForTraitCollection:)
     public func adaptText(forTraitCollection traitCollection: UITraitCollection) {
-        for state in UIControlState.commonStates {
+        for state in UIControl.State.commonStates {
             #if swift(>=3.0)
                 let attributedText = attributedTitle(for: state)?.adapted(to: traitCollection)
                 setAttributedTitle(attributedText, for: state)
@@ -122,14 +122,11 @@ extension UISegmentedControl {
     // `UISegmentedControl` has terrible generics ([NSObject: AnyObject]?) on
     /// `titleTextAttributes`, so use a helper in Swift 3.0.
     #if swift(>=3.0)
-    @nonobjc final func bon_titleTextAttributes(for state: UIControlState) -> StyleAttributes {
+    @nonobjc final func bon_titleTextAttributes(for state: UIControl.State) -> StyleAttributes {
         let attributes = titleTextAttributes(for: state) ?? [:]
         var result: StyleAttributes = [:]
         for value in attributes {
-            guard let string = value.key as? String else {
-                fatalError("Can not convert key \(value.key) to String")
-            }
-            result[string] = value
+            result[value.key.rawValue] = value
         }
         return result
     }
@@ -140,11 +137,11 @@ extension UISegmentedControl {
     /// - parameter traitCollection: The new trait collection.
     @objc(bon_updateTextForTraitCollection:)
     public func adaptText(forTraitCollection traitCollection: UITraitCollection) {
-        for state in UIControlState.commonStates {
+        for state in UIControl.State.commonStates {
             #if swift(>=3.0)
                 let attributes = bon_titleTextAttributes(for: state)
                 let newAttributes = NSAttributedString.adapt(attributes: attributes, to: traitCollection)
-                setTitleTextAttributes(newAttributes, for: state)
+                setTitleTextAttributes(NSAttributedString.fromStyleAttributes(attributes: newAttributes), for: state)
             #else
                 if let attributes = titleTextAttributesForState(state) as? StyleAttributes {
                     let newAttributes = NSAttributedString.adapt(attributes: attributes, to: traitCollection)
@@ -167,8 +164,8 @@ extension UINavigationBar {
     /// - parameter traitCollection: The new trait collection.
     @objc(bon_updateTextForTraitCollection:)
     public func adaptText(forTraitCollection traitCollection: UITraitCollection) {
-        if let titleTextAttributes = titleTextAttributes {
-            self.titleTextAttributes = NSAttributedString.adapt(attributes: titleTextAttributes, to: traitCollection)
+        if let titleTextAttributes = convertFromOptionalNSAttributedStringKeyDictionary(titleTextAttributes) {
+            self.titleTextAttributes = convertToOptionalNSAttributedStringKeyDictionary(NSAttributedString.adapt(attributes: titleTextAttributes, to: traitCollection))
         }
     }
 
@@ -230,11 +227,11 @@ extension UIBarItem {
     /// - parameter traitCollection: the new trait collection.
     @objc(bon_updateTextForTraitCollection:)
     public func adaptText(forTraitCollection traitCollection: UITraitCollection) {
-        for state in UIControlState.commonStates {
+        for state in UIControl.State.commonStates {
             #if swift(>=3.0)
-                let attributes = titleTextAttributes(for: state) ?? [:]
+                let attributes = convertFromOptionalNSAttributedStringKeyDictionary(titleTextAttributes(for: state)) ?? [:]
                 let newAttributes = NSAttributedString.adapt(attributes: attributes, to: traitCollection)
-                setTitleTextAttributes(newAttributes, for: state)
+                setTitleTextAttributes(convertToOptionalNSAttributedStringKeyDictionary(newAttributes), for: state)
             #else
                 let attributes = titleTextAttributesForState(state) ?? [:]
                 let newAttributes = NSAttributedString.adapt(attributes: attributes, to: traitCollection)
@@ -245,14 +242,14 @@ extension UIBarItem {
 
 }
 
-extension UIControlState {
+extension UIControl.State {
 
     /// The most common states that are used in apps. Using this defined set of
     /// attributes is far simpler than trying to build a system that will
     /// iterate through only the permutations that are currently configured. If
     /// you use a valid `UIControlState` in your app that is not represented
     /// here, please open a pull request to add it.
-    @nonobjc static var commonStates: [UIControlState] {
+    @nonobjc static var commonStates: [UIControl.State] {
         #if swift(>=3.0)
             return [.normal, .highlighted, .disabled, .selected, [.highlighted, .selected]]
         #else
@@ -271,4 +268,26 @@ extension UINavigationItem {
         return allBarItems
     }
 
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertFromNSAttributedStringKey(_ input: NSAttributedString.Key) -> String {
+	return input.rawValue
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertToNSAttributedStringKeyDictionary(_ input: [String: Any]) -> [NSAttributedString.Key: Any] {
+	return Dictionary(uniqueKeysWithValues: input.map { key, value in (NSAttributedString.Key(rawValue: key), value)})
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertFromOptionalNSAttributedStringKeyDictionary(_ input: [NSAttributedString.Key: Any]?) -> [String: Any]? {
+	guard let input = input else { return nil }
+	return Dictionary(uniqueKeysWithValues: input.map {key, value in (key.rawValue, value)})
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertToOptionalNSAttributedStringKeyDictionary(_ input: [String: Any]?) -> [NSAttributedString.Key: Any]? {
+	guard let input = input else { return nil }
+	return Dictionary(uniqueKeysWithValues: input.map { key, value in (NSAttributedString.Key(rawValue: key), value)})
 }

@@ -32,7 +32,7 @@ class ComposableTests: XCTestCase {
         let style = StringStyle(.extraAttributes(["test": "test"]))
 
         let chainString = NSAttributedString.composed(of: [imageForTest, "Test", imageForTest], baseStyle: style).attributedString()
-        let attributes = chainString.attributes(at: chainString.length - 1, effectiveRange: nil)
+        let attributes = convertFromNSAttributedStringKeyDictionary(chainString.attributes(at: chainString.length - 1, effectiveRange: nil))
 
         XCTAssertEqual(attributes["test"] as? String, "test")
     }
@@ -91,21 +91,21 @@ class ComposableTests: XCTestCase {
             let string = NSAttributedString.composed(of: [
                 "test".styled(with: thePart),
                 ], baseStyle: fullStyle)
-            let value = string.attributes(at: 0, effectiveRange: nil)[attribute] as? T
+            let value = convertFromNSAttributedStringKeyDictionary(string.attributes(at: 0, effectiveRange: nil))[attribute] as? T
             XCTAssertEqual(value, expected, line: line)
         }
         let font = BONFont(name: "Avenir-Book", size: 28)!
-        check(forPart: .color(.colorA), NSForegroundColorAttributeName, BONColor.colorA)
-        check(forPart: .backgroundColor(.colorA), NSBackgroundColorAttributeName, BONColor.colorA)
-        check(forPart: .font(font), NSFontAttributeName, font)
-        check(forPart: .baselineOffset(10), NSBaselineOffsetAttributeName, CGFloat(10))
-        check(forPart: .tracking(.point(10)), NSKernAttributeName, CGFloat(10))
-        check(forPart: .link(URL(string: "http://thebestwords.com/")!), NSLinkAttributeName, URL(string: "http://thebestwords.com/")!)
-        check(forPart: .ligatures(.disabled), NSLigatureAttributeName, 0)
+        check(forPart: .color(.colorA), convertFromNSAttributedStringKey(NSAttributedString.Key.foregroundColor), BONColor.colorA)
+        check(forPart: .backgroundColor(.colorA), convertFromNSAttributedStringKey(NSAttributedString.Key.backgroundColor), BONColor.colorA)
+        check(forPart: .font(font), convertFromNSAttributedStringKey(NSAttributedString.Key.font), font)
+        check(forPart: .baselineOffset(10), convertFromNSAttributedStringKey(NSAttributedString.Key.baselineOffset), CGFloat(10))
+        check(forPart: .tracking(.point(10)), convertFromNSAttributedStringKey(NSAttributedString.Key.kern), CGFloat(10))
+        check(forPart: .link(URL(string: "http://thebestwords.com/")!), convertFromNSAttributedStringKey(NSAttributedString.Key.link), URL(string: "http://thebestwords.com/")!)
+        check(forPart: .ligatures(.disabled), convertFromNSAttributedStringKey(NSAttributedString.Key.ligature), 0)
         #if os(iOS) || os(tvOS) || os(watchOS)
-            check(forPart: .speaksPunctuation(true), UIAccessibilitySpeechAttributePunctuation, true)
-            check(forPart: .speakingLanguage("en-US"), UIAccessibilitySpeechAttributeLanguage, "en-US")
-            check(forPart: .speakingPitch(0.5), UIAccessibilitySpeechAttributePitch, 0.5)
+            check(forPart: .speaksPunctuation(true), convertFromNSAttributedStringKey(NSAttributedString.Key.accessibilitySpeechPunctuation), true)
+            check(forPart: .speakingLanguage("en-US"), convertFromNSAttributedStringKey(NSAttributedString.Key.accessibilitySpeechLanguage), "en-US")
+            check(forPart: .speakingPitch(0.5), convertFromNSAttributedStringKey(NSAttributedString.Key.accessibilitySpeechPitch), 0.5)
         #endif
     }
 
@@ -114,7 +114,7 @@ class ComposableTests: XCTestCase {
             let string = NSAttributedString.composed(of: [
                 "test".styled(with: thePart),
                 ], baseStyle: fullStyle)
-            guard let paragraphStyle = string.attributes(at: 0, effectiveRange: nil)[NSParagraphStyleAttributeName] as? NSParagraphStyle else {
+            guard let paragraphStyle = convertFromNSAttributedStringKeyDictionary(string.attributes(at: 0, effectiveRange: nil))[convertFromNSAttributedStringKey(NSAttributedString.Key.paragraphStyle)] as? NSParagraphStyle else {
                 XCTFail("No paragraph style")
                 return
             }
@@ -137,10 +137,10 @@ class ComposableTests: XCTestCase {
     }
 
     func testInitialParagraphStyle() {
-        let style = StringStyle(.extraAttributes([NSParagraphStyleAttributeName: NSParagraphStyle()]))
+        let style = StringStyle(.extraAttributes([convertFromNSAttributedStringKey(NSAttributedString.Key.paragraphStyle): NSParagraphStyle()]))
 
         let string = NSAttributedString.composed(of: [Tab.headIndent(10), "ParagraphStyle mutable promotion"], baseStyle: style)
-        XCTAssertNotNil(string.attribute(NSParagraphStyleAttributeName, at: 0, effectiveRange: nil) as? NSMutableParagraphStyle)
+        XCTAssertNotNil(string.attribute(NSAttributedString.Key.paragraphStyle, at: 0, effectiveRange: nil) as? NSMutableParagraphStyle)
     }
 
     func testCompositionWithChangingParagraphStyles() {
@@ -150,11 +150,11 @@ class ComposableTests: XCTestCase {
             " headIndent "
                 .styled(with: .headIndent(10)),
             ], baseStyle: StringStyle(.firstLineHeadIndent(5)))
-        guard let paragraphStart = string.attribute(NSParagraphStyleAttributeName, at: 0, effectiveRange: nil) as? NSParagraphStyle else {
+        guard let paragraphStart = string.attribute(NSAttributedString.Key.paragraphStyle, at: 0, effectiveRange: nil) as? NSParagraphStyle else {
             XCTFail("No paragraph style at start")
             return
         }
-        guard let paragraphEnd = string.attribute(NSParagraphStyleAttributeName, at: string.length - 1, effectiveRange: nil) as? NSParagraphStyle else {
+        guard let paragraphEnd = string.attribute(NSAttributedString.Key.paragraphStyle, at: string.length - 1, effectiveRange: nil) as? NSParagraphStyle else {
             XCTFail("No paragraph style at end")
             return
         }
@@ -168,4 +168,14 @@ class ComposableTests: XCTestCase {
         XCTAssertEqual(paragraphEnd.lineSpacing, 0)
     }
 
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertFromNSAttributedStringKeyDictionary(_ input: [NSAttributedString.Key: Any]) -> [String: Any] {
+	return Dictionary(uniqueKeysWithValues: input.map {key, value in (key.rawValue, value)})
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertFromNSAttributedStringKey(_ input: NSAttributedString.Key) -> String {
+	return input.rawValue
 }

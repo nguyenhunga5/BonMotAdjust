@@ -63,7 +63,7 @@ extension UITextField {
         set {
             StyleableUIElementHelpers.setAssociatedStyle(on: self, style: newValue)
             styledText = text
-            defaultTextAttributes = bonMotStyle?.attributes(adaptedTo: traitCollection) ?? [:]
+            defaultTextAttributes = convertToNSAttributedStringKeyDictionary(bonMotStyle?.attributes(adaptedTo: traitCollection) ?? [:])
         }
     }
 
@@ -77,7 +77,7 @@ extension UITextField {
             // Set the font first to avoid a bug that causes UITextField to hang
             if let styledText = styledText {
                 if styledText.length > 0 {
-                    font = styledText.attribute(NSFontAttributeName, at: 0, effectiveRange: nil) as? UIFont
+                    font = styledText.attribute(NSAttributedString.Key.font, at: 0, effectiveRange: nil) as? UIFont
                 }
             }
             attributedText = styledText
@@ -125,7 +125,7 @@ extension UITextView {
         get { return StyleableUIElementHelpers.getAssociatedStyle(from: self) }
         set {
             StyleableUIElementHelpers.setAssociatedStyle(on: self, style: newValue)
-            typingAttributes = newValue?.attributes(adaptedTo: traitCollection) ?? typingAttributes
+            typingAttributes = convertToNSAttributedStringKeyDictionary(newValue?.attributes(adaptedTo: traitCollection) ?? NSAttributedString.toStyleAttributes(attributes: typingAttributes))
             styledText = text
         }
     }
@@ -223,4 +223,9 @@ internal class StringStyleHolder: NSObject {
         self.style = style
     }
 
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertToNSAttributedStringKeyDictionary(_ input: [String: Any]) -> [NSAttributedString.Key: Any] {
+	return Dictionary(uniqueKeysWithValues: input.map { key, value in (NSAttributedString.Key(rawValue: key), value)})
 }

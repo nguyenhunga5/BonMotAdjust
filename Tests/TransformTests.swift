@@ -45,12 +45,12 @@ class TransformTests: XCTestCase {
             for i in startIndex..<(startIndex + substringUTF16Count) {
                 let characterRange = NSRange(location: i, length: 1)
                 #if swift(>=3.0)
-                    let characterAttributes = string.attributes(at: startIndex, longestEffectiveRange: nil, in: characterRange)
+                    let characterAttributes = convertFromNSAttributedStringKeyDictionary(string.attributes(at: startIndex, longestEffectiveRange: nil, in: characterRange))
                 #else
                     let characterAttributes = string.attributesAtIndex(startIndex, longestEffectiveRange: nil, inRange: characterRange)
                 #endif
 
-                guard let characterColor = characterAttributes[NSForegroundColorAttributeName] as? BONColor else {
+                guard let characterColor = characterAttributes[convertFromNSAttributedStringKey(NSAttributedString.Key.foregroundColor)] as? BONColor else {
                     XCTFail("Failed to get color at index \(startIndex) of string \(string)", file: file, line: line)
                     continue
                 }
@@ -183,4 +183,14 @@ class TransformTests: XCTestCase {
             ], in: styled)
     }
 
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertFromNSAttributedStringKeyDictionary(_ input: [NSAttributedString.Key: Any]) -> [String: Any] {
+	return Dictionary(uniqueKeysWithValues: input.map {key, value in (key.rawValue, value)})
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertFromNSAttributedStringKey(_ input: NSAttributedString.Key) -> String {
+	return input.rawValue
 }

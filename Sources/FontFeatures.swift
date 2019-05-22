@@ -30,14 +30,14 @@
         ///                           font.
         /// - returns: a new font with the specified features enabled.
         public func font(withFeatures featureProviders: [FontFeatureProvider]) -> BONFont {
-            var fontAttributes = fontDescriptor.fontAttributes
+            var fontAttributes = convertFromUIFontDescriptorAttributeNameDictionary(fontDescriptor.fontAttributes)
             var features = fontAttributes[BONFontDescriptorFeatureSettingsAttribute] as? [StyleAttributes] ?? []
             if featureProviders.count > 0 {
                 let newFeatures = featureProviders.map { $0.featureAttributes() }.flatMap { $0 }
                 features.append(contentsOf: newFeatures)
                 fontAttributes[BONFontDescriptorFeatureSettingsAttribute] = features
             }
-            let descriptor = BONFontDescriptor(fontAttributes: fontAttributes)
+            let descriptor = BONFontDescriptor(fontAttributes: convertToUIFontDescriptorAttributeNameDictionary(fontAttributes))
             #if os(OSX)
                 return BONFont(descriptor: descriptor, size: pointSize)!
             #else
@@ -208,3 +208,13 @@
     }
 
 #endif
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertFromUIFontDescriptorAttributeNameDictionary(_ input: [UIFontDescriptor.AttributeName: Any]) -> [String: Any] {
+	return Dictionary(uniqueKeysWithValues: input.map {key, value in (key.rawValue, value)})
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertToUIFontDescriptorAttributeNameDictionary(_ input: [String: Any]) -> [UIFontDescriptor.AttributeName: Any] {
+	return Dictionary(uniqueKeysWithValues: input.map { key, value in (UIFontDescriptor.AttributeName(rawValue: key), value)})
+}

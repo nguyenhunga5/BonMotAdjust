@@ -15,9 +15,9 @@
     typealias BONView = NSView
 #else
     import UIKit
-    let BONFontDescriptorFeatureSettingsAttribute = UIFontDescriptorFeatureSettingsAttribute
-    let BONFontFeatureTypeIdentifierKey = UIFontFeatureTypeIdentifierKey
-    let BONFontFeatureSelectorIdentifierKey = UIFontFeatureSelectorIdentifierKey
+    let BONFontDescriptorFeatureSettingsAttribute = convertFromUIFontDescriptorAttributeName(UIFontDescriptor.AttributeName.featureSettings)
+    let BONFontFeatureTypeIdentifierKey = convertFromUIFontDescriptorFeatureKey(UIFontDescriptor.FeatureKey.featureIdentifier)
+    let BONFontFeatureSelectorIdentifierKey = convertFromUIFontDescriptorFeatureKey(UIFontDescriptor.FeatureKey.typeIdentifier)
     typealias BONView = UIView
 #endif
 import BonMot
@@ -557,3 +557,13 @@ import BonMot
 #endif
 #endif
 //swiftlint:enable file_length
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertFromUIFontDescriptorAttributeName(_ input: UIFontDescriptor.AttributeName) -> String {
+	return input.rawValue
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertFromUIFontDescriptorFeatureKey(_ input: UIFontDescriptor.FeatureKey) -> String {
+	return input.rawValue
+}

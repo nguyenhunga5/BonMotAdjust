@@ -37,6 +37,13 @@ extension NSAttributedString {
         let newString = mutableStringCopy()
         newString.beginEditing()
         enumerateAttributes(in: NSRange(location: 0, length: length), options: []) { (attributes, range, _) in
+            
+            let attributes: StyleAttributes = attributes.reduce(StyleAttributes(), { (results, arg1) in
+                let (key, value) = arg1
+                var results = results
+                results[key.rawValue] = value
+                return results
+            })
             var styleAttributes = attributes
 
             // Adapt any AdaptiveStyleTransformation embedded in the attributes.
@@ -49,7 +56,7 @@ extension NSAttributedString {
             for transformation in transformations {
                 transformation.update(string: newString, in: range)
             }
-            newString.setAttributes(NSAttributedString.adapt(attributes: attributes, to: traitCollection), range: range)
+            newString.setAttributes(convertToOptionalNSAttributedStringKeyDictionary(NSAttributedString.adapt(attributes: attributes, to: traitCollection)), range: range)
         }
         newString.endEditing()
         return newString
@@ -82,4 +89,10 @@ extension NSAttributedString {
         }
     #endif
 
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertToOptionalNSAttributedStringKeyDictionary(_ input: [String: Any]?) -> [NSAttributedString.Key: Any]? {
+	guard let input = input else { return nil }
+	return Dictionary(uniqueKeysWithValues: input.map { key, value in (NSAttributedString.Key(rawValue: key), value)})
 }

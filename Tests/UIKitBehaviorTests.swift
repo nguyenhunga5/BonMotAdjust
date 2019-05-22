@@ -27,13 +27,13 @@ class UIKitBehaviorTests: XCTestCase {
 
         // Ensure font information is mirrored in attributed string
         let attributedText = label.attributedText!
-        let attributeFont = attributedText.attribute(NSFontAttributeName, at: 0, effectiveRange: nil) as? UIFont
+        let attributeFont = attributedText.attribute(NSAttributedString.Key.font, at: 0, effectiveRange: nil) as? UIFont
         XCTAssertEqual(attributeFont, largeFont)
 
         // Change the font in the attributed string
-        var attributes = attributedText.attributes(at: 0, effectiveRange: nil)
-        attributes[NSFontAttributeName] = smallFont
-        label.attributedText = NSAttributedString(string: "Testing", attributes: attributes)
+        var attributes = convertFromNSAttributedStringKeyDictionary(attributedText.attributes(at: 0, effectiveRange: nil))
+        attributes[convertFromNSAttributedStringKey(NSAttributedString.Key.font)] = smallFont
+        label.attributedText = NSAttributedString(string: "Testing", attributes: convertToOptionalNSAttributedStringKeyDictionary(attributes))
         // Note that the font property is updated.
         XCTAssertEqual(label.font, smallFont)
 
@@ -98,12 +98,28 @@ class UIKitBehaviorTests: XCTestCase {
     // Check to see if arbitrary text survives re-configuration (spoiler: it doesn't).
     func testLabelAttributedStringAttributePreservationBehavior() {
         let label = UILabel()
-        label.attributedText = NSAttributedString(string: "", attributes: ["TestAttribute": true])
+        label.attributedText = NSAttributedString(string: "", attributes: convertToOptionalNSAttributedStringKeyDictionary(["TestAttribute": true]))
         label.text = "New Text"
         label.font = UIFont(name: "Avenir-Roman", size: 10)
-        let attributes = label.attributedText?.attributes(at: 0, effectiveRange: nil)
+        let attributes = convertFromNSAttributedStringKeyDictionary((label.attributedText?.attributes(at: 0, effectiveRange: nil))!)
         XCTAssertNotNil(attributes)
-        XCTAssertNil(attributes?["TestAttribute"])
+        XCTAssertNil(attributes["TestAttribute"])
     }
 
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertFromNSAttributedStringKeyDictionary(_ input: [NSAttributedString.Key: Any]) -> [String: Any] {
+	return Dictionary(uniqueKeysWithValues: input.map {key, value in (key.rawValue, value)})
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertFromNSAttributedStringKey(_ input: NSAttributedString.Key) -> String {
+	return input.rawValue
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertToOptionalNSAttributedStringKeyDictionary(_ input: [String: Any]?) -> [NSAttributedString.Key: Any]? {
+	guard let input = input else { return nil }
+	return Dictionary(uniqueKeysWithValues: input.map { key, value in (NSAttributedString.Key(rawValue: key), value)})
 }

@@ -38,7 +38,7 @@ extension Tab: Composable {
         #endif
         let tabRange = NSRange(location: attributedString.length, length: 1)
 
-        attributedString.append(NSAttributedString(string: Special.tab.description, attributes: tabAttributes))
+        attributedString.append(NSAttributedString(string: Special.tab.description, attributes: convertToOptionalNSAttributedStringKeyDictionary(tabAttributes)))
 
         // Calculate the tab spacing
         update(string: attributedString, in: tabRange)
@@ -75,8 +75,8 @@ extension Tab {
         var paragraphAttribute: Any?
         while paragraphCursor >= leadingNewline && paragraphAttribute == nil {
             var attributeRange = NSRange()
-            let attributes = attributedString.attributes(at: paragraphCursor, effectiveRange: &attributeRange)
-            paragraphAttribute = attributes[NSParagraphStyleAttributeName]
+            let attributes = convertFromNSAttributedStringKeyDictionary(attributedString.attributes(at: paragraphCursor, effectiveRange: &attributeRange))
+            paragraphAttribute = attributes[convertFromNSAttributedStringKey(NSAttributedString.Key.paragraphStyle)]
             paragraphCursor = attributeRange.location - 1
         }
 
@@ -113,7 +113,7 @@ extension Tab {
 
                 // Add the padding and update the NSTextTab at tabIndex.
                 let tabStop = contentWidth + padding
-                paragraph.tabStops[tabIndex] = NSTextTab(textAlignment: .natural, location: tabStop, options: [:])
+                paragraph.tabStops[tabIndex] = NSTextTab(textAlignment: .natural, location: tabStop, options: convertToNSTextTabOptionKeyDictionary([:]))
 
                 // Update the paragraph object if it is a headIndent tab.
                 if case .headIndent = self {
@@ -125,7 +125,7 @@ extension Tab {
             enumerationRange.location = NSMaxRange(tabRange)
             tabIndex += 1
         }
-        attributedString.addAttribute(NSParagraphStyleAttributeName, value: paragraph, range: paragraphRange)
+        attributedString.addAttribute(NSAttributedString.Key.paragraphStyle, value: paragraph, range: paragraphRange)
     }
 
     var padding: CGFloat {
@@ -135,4 +135,25 @@ extension Tab {
         }
     }
 
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertToOptionalNSAttributedStringKeyDictionary(_ input: [String: Any]?) -> [NSAttributedString.Key: Any]? {
+	guard let input = input else { return nil }
+	return Dictionary(uniqueKeysWithValues: input.map { key, value in (NSAttributedString.Key(rawValue: key), value)})
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertFromNSAttributedStringKeyDictionary(_ input: [NSAttributedString.Key: Any]) -> [String: Any] {
+	return Dictionary(uniqueKeysWithValues: input.map {key, value in (key.rawValue, value)})
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertFromNSAttributedStringKey(_ input: NSAttributedString.Key) -> String {
+	return input.rawValue
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertToNSTextTabOptionKeyDictionary(_ input: [String: Any]) -> [NSTextTab.OptionKey: Any] {
+	return Dictionary(uniqueKeysWithValues: input.map { key, value in (NSTextTab.OptionKey(rawValue: key), value)})
 }

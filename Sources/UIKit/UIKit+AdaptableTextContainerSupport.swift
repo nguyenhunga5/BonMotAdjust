@@ -21,7 +21,7 @@ extension UIApplication {
     public final func enableAdaptiveContentSizeMonitor() {
         #if swift(>=3.0)
             let notificationCenter = NotificationCenter.default
-            let notificationName = NSNotification.Name.UIContentSizeCategoryDidChange
+            let notificationName = UIContentSizeCategory.didChangeNotification
         #else
             let notificationCenter = NSNotificationCenter.defaultCenter()
             let notificationName = UIContentSizeCategoryDidChangeNotification
@@ -64,7 +64,7 @@ extension UIViewController {
                 view.notifyContainedAdaptiveContentSizeContainers()
             }
         }
-        for viewController in childViewControllers {
+        for viewController in children {
             viewController.notifyContainedAdaptiveContentSizeContainers()
         }
         presentedViewController?.notifyContainedAdaptiveContentSizeContainers()

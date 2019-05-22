@@ -118,7 +118,7 @@ extension NSAttributedString: Composable {
         enumerateAttributes(in: range, options: []) { (attributes, range, _) in
             let substring = self.attributedSubstring(from: range)
             // Add the string with the defaults supplied by the style
-            let newString = baseStyle.attributedString(from: substring.string, existingAttributes: attributes)
+            let newString = baseStyle.attributedString(from: substring.string, existingAttributes: NSAttributedString.toStyleAttributes(attributes: attributes))
             attributedString.append(newString)
         }
     }
@@ -163,7 +163,7 @@ extension BONImage: Composable {
         #if os(OSX)
             let imageIsTemplate = isTemplate
         #else
-            let imageIsTemplate = (renderingMode != UIImageRenderingMode.alwaysOriginal)
+            let imageIsTemplate = (renderingMode != UIImage.RenderingMode.alwaysOriginal)
         #endif
 
         var imageToUse = self
@@ -179,8 +179,8 @@ extension BONImage: Composable {
         let attachmentString = NSAttributedString(attachment: attachment).mutableStringCopy()
         // Remove the baseline offset from the attributes so it isn't applied twice
         var attributes = baseStyle.attributes
-        attributes[NSBaselineOffsetAttributeName] = nil
-        attachmentString.addAttributes(attributes, range: NSRange(location: 0, length: attachmentString.length))
+        attributes[convertFromNSAttributedStringKey(NSAttributedString.Key.baselineOffset)] = nil
+        attachmentString.addAttributes(convertToNSAttributedStringKeyDictionary(attributes), range: NSRange(location: 0, length: attachmentString.length))
 
         attributedString.append(attachmentString)
     }
@@ -199,4 +199,14 @@ extension Special: Composable {
         description.append(to: attributedString, baseStyle: baseStyle)
     }
 
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertFromNSAttributedStringKey(_ input: NSAttributedString.Key) -> String {
+	return input.rawValue
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertToNSAttributedStringKeyDictionary(_ input: [String: Any]) -> [NSAttributedString.Key: Any] {
+	return Dictionary(uniqueKeysWithValues: input.map { key, value in (NSAttributedString.Key(rawValue: key), value)})
 }

@@ -32,7 +32,7 @@ public class TextAlignmentConstraint: NSLayoutConstraint {
         case lastBaseline
         case bottom
 
-        var layoutAttribute: NSLayoutAttribute {
+        var layoutAttribute: NSLayoutConstraint.Attribute {
             switch self {
             case .top, .capHeight, .firstBaseline, .xHeight:
                 return .top
@@ -126,7 +126,7 @@ public class TextAlignmentConstraint: NSLayoutConstraint {
     ///   - attr2: The attribute of the view for the right side of the constraint equation.
     /// - Returns: A constraint object relating the two provided views with the
     ///            specified relation and attributes.
-    public static func with(item view1: AnyObject, attribute attr1: BonMot.TextAlignmentConstraint.TextAttribute, relatedBy relation: NSLayoutRelation, toItem view2: AnyObject, attribute attr2: BonMot.TextAlignmentConstraint.TextAttribute) -> TextAlignmentConstraint {
+    public static func with(item view1: AnyObject, attribute attr1: BonMot.TextAlignmentConstraint.TextAttribute, relatedBy relation: NSLayoutConstraint.Relation, toItem view2: AnyObject, attribute attr2: BonMot.TextAlignmentConstraint.TextAttribute) -> TextAlignmentConstraint {
         let constraint = TextAlignmentConstraint(
             item: view1,
             attribute: attr1.layoutAttribute,
@@ -210,7 +210,7 @@ public class TextAlignmentConstraint: NSLayoutConstraint {
         #if os(OSX)
             let distanceFromTop1 = distanceFromTop(of: firstItem!, with: firstItemAttribute)
         #else
-            let distanceFromTop1 = distanceFromTop(of: firstItem, with: firstItemAttribute)
+        let distanceFromTop1 = distanceFromTop(of: firstItem!, with: firstItemAttribute)
         #endif
 
         let distanceFromTop2 = distanceFromTop(of: secondItem!, with: secondItemAttribute)

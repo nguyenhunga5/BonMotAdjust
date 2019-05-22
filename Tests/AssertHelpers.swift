@@ -17,7 +17,7 @@ func dataFromImage(image theImage: BONImage) -> Data {
         let pngData = bitmapImageRep.representation(using: .PNG, properties: [:])!
         return pngData
     #else
-        return UIImagePNGRepresentation(theImage)!
+        return theImage.pngData()!
     #endif
 }
 
@@ -53,7 +53,7 @@ func BONAssert(attributes dictionary: StyleAttributes?, key: String, float: CGFl
 }
 
 func BONAssert(attributes dictionary: StyleAttributes?, query: (BONFont) -> CGFloat, float: CGFloat, accuracy: CGFloat = 0.001, file: StaticString = #file, line: UInt = #line) {
-    guard let font = dictionary?[NSFontAttributeName] as? BONFont else {
+    guard let font = dictionary?[convertFromNSAttributedStringKey(NSAttributedString.Key.font)] as? BONFont else {
         XCTFail("value is not of expected type", file: file, line: line)
         return
     }
@@ -62,7 +62,7 @@ func BONAssert(attributes dictionary: StyleAttributes?, query: (BONFont) -> CGFl
 }
 
 func BONAssert(attributes dictionary: StyleAttributes?, query: (NSParagraphStyle) -> CGFloat, float: CGFloat, accuracy: CGFloat, file: StaticString = #file, line: UInt = #line) {
-    guard let paragraphStyle = dictionary?[NSParagraphStyleAttributeName] as? NSParagraphStyle else {
+    guard let paragraphStyle = dictionary?[convertFromNSAttributedStringKey(NSAttributedString.Key.paragraphStyle)] as? NSParagraphStyle else {
         XCTFail("value is not of expected type", file: file, line: line)
         return
     }
@@ -71,7 +71,7 @@ func BONAssert(attributes dictionary: StyleAttributes?, query: (NSParagraphStyle
 }
 
 func BONAssert(attributes dictionary: StyleAttributes?, query: (NSParagraphStyle) -> Int, value: Int, file: StaticString = #file, line: UInt = #line) {
-    guard let paragraphStyle = dictionary?[NSParagraphStyleAttributeName] as? NSParagraphStyle else {
+    guard let paragraphStyle = dictionary?[convertFromNSAttributedStringKey(NSAttributedString.Key.paragraphStyle)] as? NSParagraphStyle else {
         XCTFail("value is not of expected type", file: file, line: line)
         return
     }
@@ -81,7 +81,7 @@ func BONAssert(attributes dictionary: StyleAttributes?, query: (NSParagraphStyle
 
 #if swift(>=3.0)
     func BONAssert<T: RawRepresentable>(attributes dictionary: StyleAttributes?, query: (NSParagraphStyle) -> T, value: T, file: StaticString = #file, line: UInt = #line) where T.RawValue: Equatable {
-        guard let paragraphStyle = dictionary?[NSParagraphStyleAttributeName] as? NSParagraphStyle else {
+        guard let paragraphStyle = dictionary?[convertFromNSAttributedStringKey(NSAttributedString.Key.paragraphStyle)] as? NSParagraphStyle else {
             XCTFail("value is not of expected type", file: file, line: line)
             return
         }
@@ -136,3 +136,8 @@ func BONAssert(attributes dictionary: StyleAttributes?, query: (NSParagraphStyle
         XCTAssertEqual(descriptor1, descriptor2, file: file, line: line)
     }
 #endif
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertFromNSAttributedStringKey(_ input: NSAttributedString.Key) -> String {
+	return input.rawValue
+}

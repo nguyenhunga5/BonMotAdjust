@@ -24,9 +24,9 @@
 
     public typealias BONFont = UIFont
     public typealias BONFontDescriptor = UIFontDescriptor
-    let BONFontDescriptorFeatureSettingsAttribute = UIFontDescriptorFeatureSettingsAttribute
-    let BONFontFeatureTypeIdentifierKey = UIFontFeatureTypeIdentifierKey
-    let BONFontFeatureSelectorIdentifierKey = UIFontFeatureSelectorIdentifierKey
+    let BONFontDescriptorFeatureSettingsAttribute = convertFromUIFontDescriptorAttributeName(UIFontDescriptor.AttributeName.featureSettings)
+    let BONFontFeatureTypeIdentifierKey = convertFromUIFontDescriptorFeatureKey(UIFontDescriptor.FeatureKey.featureIdentifier)
+    let BONFontFeatureSelectorIdentifierKey = convertFromUIFontDescriptorFeatureKey(UIFontDescriptor.FeatureKey.typeIdentifier)
 
     #if os(iOS) || os(tvOS)
         public typealias BONTextField = UITextField
@@ -43,7 +43,7 @@ public typealias StyleAttributes = [String: StyleAttributeValue]
 
 #if os(iOS) || os(tvOS)
     #if swift(>=3.0)
-        public typealias BonMotTextStyle = UIFontTextStyle
+        public typealias BonMotTextStyle = UIFont.TextStyle
         public typealias BonMotContentSizeCategory = UIContentSizeCategory
     #else
         public typealias BonMotTextStyle = String
@@ -53,3 +53,13 @@ public typealias StyleAttributes = [String: StyleAttributeValue]
 
 // This key is defined here because it needs to be used in non-adaptive code.
 public let BonMotTransformationsAttributeName = "BonMotTransformations"
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertFromUIFontDescriptorAttributeName(_ input: UIFontDescriptor.AttributeName) -> String {
+	return input.rawValue
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertFromUIFontDescriptorFeatureKey(_ input: UIFontDescriptor.FeatureKey) -> String {
+	return input.rawValue
+}

@@ -125,7 +125,7 @@ class AdaptiveStyleTests: XCTestCase {
         let testKernAdaptation = { (contentSizeCategory: BonMotContentSizeCategory) -> CGFloat in
             let traitCollection = UITraitCollection(preferredContentSizeCategory: contentSizeCategory)
             let adaptedAttributes = NSAttributedString.adapt(attributes: attributes, to: traitCollection)
-            return adaptedAttributes[NSKernAttributeName] as? CGFloat ?? 0
+            return adaptedAttributes[convertFromNSAttributedStringKey(NSAttributedString.Key.kern)] as? CGFloat ?? 0
         }
 
         XCTAssertEqualWithAccuracy(testKernAdaptation(UIContentSizeCategory.extraSmall.compatible), 8.1, accuracy: 0.0001)
@@ -178,8 +178,8 @@ class AdaptiveStyleTests: XCTestCase {
             XCTAssertEqual(originalAttributes.count, 3, line: partLine)
             XCTAssertEqual(adaptedAttributes.count, 3, line: partLine)
 
-            let originalFont = originalAttributes[NSFontAttributeName] as? BONFont
-            let adaptedFont = adaptedAttributes[NSFontAttributeName] as? BONFont
+            let originalFont = originalAttributes[convertFromNSAttributedStringKey(NSAttributedString.Key.font)] as? BONFont
+            let adaptedFont = adaptedAttributes[convertFromNSAttributedStringKey(NSAttributedString.Key.font)] as? BONFont
 
             XCTAssertNotNil(originalFont, line: partLine)
             XCTAssertNotNil(adaptedFont, line: partLine)
@@ -188,8 +188,8 @@ class AdaptiveStyleTests: XCTestCase {
             // from a font descriptor's attributes dictionary when a new descriptor
             // is created, so there is no point in testing for its presence.
             if !tuple.representsDefault {
-                let originalDescriptorAttributes = originalFont?.fontDescriptor.fontAttributes
-                let adaptedDescriptorAttributes = adaptedFont?.fontDescriptor.fontAttributes
+                let originalDescriptorAttributes = convertFromUIFontDescriptorAttributeNameDictionary(originalFont?.fontDescriptor.fontAttributes)
+                let adaptedDescriptorAttributes = convertFromUIFontDescriptorAttributeNameDictionary(adaptedFont?.fontDescriptor.fontAttributes)
 
                 let originalFeatureAttributeArray = originalDescriptorAttributes?[BONFontDescriptorFeatureSettingsAttribute] as? NSArray
                 let adaptedFeatureAttributeArray = adaptedDescriptorAttributes?[BONFontDescriptorFeatureSettingsAttribute] as? NSArray
@@ -215,7 +215,7 @@ class AdaptiveStyleTests: XCTestCase {
 
     func testTabAdaptation() {
         func firstTabLocation(attributedString string: NSAttributedString) -> CGFloat {
-            guard let paragraph = string.attribute(NSParagraphStyleAttributeName, at: 0, effectiveRange: nil) as? NSParagraphStyle else {
+            guard let paragraph = string.attribute(NSAttributedString.Key.paragraphStyle, at: 0, effectiveRange: nil) as? NSParagraphStyle else {
                 XCTFail("Unable to get paragraph")
                 return 0
             }
@@ -235,7 +235,7 @@ class AdaptiveStyleTests: XCTestCase {
         let string = NSAttributedString.composed(of: [
             "Hello".styled(with:.font(UIFont(name: "Avenir-Book", size: 28)!), .tracking(.adobe(3.0))),
             ], baseStyle: StringStyle(.font(UIFont(name: "Avenir-Book", size: 28)!), .adapt(.control)))
-        let attributes = string.attribute(BonMotTransformationsAttributeName, at: string.length - 1, effectiveRange: nil) as? [StyleAttributeValue]
+        let attributes = string.attribute(convertToNSAttributedStringKey(BonMotTransformationsAttributeName), at: string.length - 1, effectiveRange: nil) as? [StyleAttributeValue]
         XCTAssertEqual(attributes?.count, 2)
     }
 
@@ -245,8 +245,8 @@ class AdaptiveStyleTests: XCTestCase {
             Tab.headIndent(10),
             ], baseStyle: StringStyle(.font(UIFont(name: "Avenir-Book", size: 28)!), .adapt(.control)))
 
-        let attributes1 = string.attribute(BonMotTransformationsAttributeName, at:0, effectiveRange: nil) as? [StyleAttributeValue]
-        let attributes2 = string.attribute(BonMotTransformationsAttributeName, at:string.length - 1, effectiveRange: nil) as? [StyleAttributeValue]
+        let attributes1 = string.attribute(convertToNSAttributedStringKey(BonMotTransformationsAttributeName), at:0, effectiveRange: nil) as? [StyleAttributeValue]
+        let attributes2 = string.attribute(convertToNSAttributedStringKey(BonMotTransformationsAttributeName), at:string.length - 1, effectiveRange: nil) as? [StyleAttributeValue]
         XCTAssertEqual(attributes1?.count, 2)
         XCTAssertEqual(attributes2?.count, 2)
     }
@@ -254,3 +254,18 @@ class AdaptiveStyleTests: XCTestCase {
 }
 
 #endif
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertFromNSAttributedStringKey(_ input: NSAttributedString.Key) -> String {
+	return input.rawValue
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertFromUIFontDescriptorAttributeNameDictionary(_ input: [UIFontDescriptor.AttributeName: Any]) -> [String: Any] {
+	return Dictionary(uniqueKeysWithValues: input.map {key, value in (key.rawValue, value)})
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertToNSAttributedStringKey(_ input: String) -> NSAttributedString.Key {
+	return NSAttributedString.Key(rawValue: input)
+}

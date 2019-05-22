@@ -17,8 +17,8 @@ extension Tracking: AdaptiveStyleTransformation {
     func adapt(attributes theAttributes: StyleAttributes, to traitCollection: UITraitCollection) -> StyleAttributes? {
         if case .adobe = self {
             var attributes = theAttributes
-            let styledFont = theAttributes[NSFontAttributeName] as? UIFont
-            attributes.update(possibleValue: kerning(forFont: styledFont), forKey: NSKernAttributeName)
+            let styledFont = theAttributes[convertFromNSAttributedStringKey(NSAttributedString.Key.font)] as? UIFont
+            attributes.update(possibleValue: kerning(forFont: styledFont), forKey: convertFromNSAttributedStringKey(NSAttributedString.Key.kern))
             return attributes
         }
         else {
@@ -55,4 +55,9 @@ extension Tracking: EmbeddedTransformation {
         }
     }
 
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertFromNSAttributedStringKey(_ input: NSAttributedString.Key) -> String {
+	return input.rawValue
 }

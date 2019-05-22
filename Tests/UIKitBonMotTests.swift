@@ -38,14 +38,14 @@ class UIKitBonMotTests: XCTestCase {
         XCTAssertNotNil(label.bonMotStyle)
 
         XCTAssertEqual(label.styledText, label.text)
-        XCTAssertEqual((label.attributedText?.attributes(at: 0, effectiveRange: nil)[NSFontAttributeName] as? UIFont)!, expectedFont)
-        BONAssertColor(inAttributes: label.attributedText?.attributes(at: 0, effectiveRange: nil), key: NSForegroundColorAttributeName, color: adaptiveStyle.color!)
+        XCTAssertEqual((convertFromNSAttributedStringKeyDictionary(label.attributedText?.attributes(at: 0, effectiveRange: nil))[convertFromNSAttributedStringKey(NSAttributedString.Key.font)] as? UIFont)!, expectedFont)
+        BONAssertColor(inAttributes: convertFromNSAttributedStringKeyDictionary(label.attributedText?.attributes(at: 0, effectiveRange: nil)), key: convertFromNSAttributedStringKey(NSAttributedString.Key.foregroundColor), color: adaptiveStyle.color!)
 
         // Update the trait collection and ensure the font grows.
         if #available(iOS 10.0, *) {
             label.adaptText(forTraitCollection: UITraitCollection(preferredContentSizeCategory: UIContentSizeCategory.extraLarge.compatible))
-            BONAssert(attributes: label.attributedText?.attributes(at: 0, effectiveRange: nil), query: { $0.pointSize }, float: expectedFont.pointSize + 2)
-            BONAssertColor(inAttributes: label.attributedText?.attributes(at: 0, effectiveRange: nil), key: NSForegroundColorAttributeName, color: adaptiveStyle.color!)
+            BONAssert(attributes: convertFromNSAttributedStringKeyDictionary(label.attributedText?.attributes(at: 0, effectiveRange: nil)), query: { $0.pointSize }, float: expectedFont.pointSize + 2)
+            BONAssertColor(inAttributes: convertFromNSAttributedStringKeyDictionary(label.attributedText?.attributes(at: 0, effectiveRange: nil)), key: convertFromNSAttributedStringKey(NSAttributedString.Key.foregroundColor), color: adaptiveStyle.color!)
         }
     }
 
@@ -61,14 +61,14 @@ class UIKitBonMotTests: XCTestCase {
         XCTAssertNotNil(textField.bonMotStyle)
 
         XCTAssertEqual(textField.styledText, textField.text)
-        XCTAssertEqual((textField.attributedText?.attributes(at: 0, effectiveRange: nil)[NSFontAttributeName] as? UIFont)!, expectedFont)
-        BONAssertColor(inAttributes: textField.attributedText?.attributes(at: 0, effectiveRange: nil), key: NSForegroundColorAttributeName, color: adaptiveStyle.color!)
+        XCTAssertEqual((convertFromNSAttributedStringKeyDictionary(textField.attributedText?.attributes(at: 0, effectiveRange: nil))[convertFromNSAttributedStringKey(NSAttributedString.Key.font)] as? UIFont)!, expectedFont)
+        BONAssertColor(inAttributes: convertFromNSAttributedStringKeyDictionary(textField.attributedText?.attributes(at: 0, effectiveRange: nil)), key: convertFromNSAttributedStringKey(NSAttributedString.Key.foregroundColor), color: adaptiveStyle.color!)
 
         // Update the trait collection and ensure the font grows.
         if #available(iOS 10.0, *) {
             textField.adaptText(forTraitCollection: UITraitCollection(preferredContentSizeCategory: UIContentSizeCategory.extraLarge.compatible))
-            BONAssert(attributes: textField.attributedText?.attributes(at: 0, effectiveRange: nil), query: { $0.pointSize }, float: expectedFont.pointSize + 2)
-            BONAssertColor(inAttributes: textField.attributedText?.attributes(at: 0, effectiveRange: nil), key: NSForegroundColorAttributeName, color: adaptiveStyle.color!)
+            BONAssert(attributes: convertFromNSAttributedStringKeyDictionary(textField.attributedText?.attributes(at: 0, effectiveRange: nil)), query: { $0.pointSize }, float: expectedFont.pointSize + 2)
+            BONAssertColor(inAttributes: convertFromNSAttributedStringKeyDictionary(textField.attributedText?.attributes(at: 0, effectiveRange: nil)), key: convertFromNSAttributedStringKey(NSAttributedString.Key.foregroundColor), color: adaptiveStyle.color!)
         }
     }
 
@@ -84,14 +84,14 @@ class UIKitBonMotTests: XCTestCase {
         XCTAssertNotNil(textView.bonMotStyle)
 
         XCTAssertEqual(textView.styledText, textView.text)
-        XCTAssertEqual(textView.attributedText?.attributes(at: 0, effectiveRange: nil)[NSFontAttributeName] as? UIFont, expectedFont)
-        BONAssertColor(inAttributes: textView.attributedText?.attributes(at: 0, effectiveRange: nil), key: NSForegroundColorAttributeName, color: adaptiveStyle.color!)
+        XCTAssertEqual(convertFromNSAttributedStringKeyDictionary(textView.attributedText?.attributes(at: 0, effectiveRange: nil))[convertFromNSAttributedStringKey(NSAttributedString.Key.font)] as? UIFont, expectedFont)
+        BONAssertColor(inAttributes: convertFromNSAttributedStringKeyDictionary(textView.attributedText?.attributes(at: 0, effectiveRange: nil)), key: convertFromNSAttributedStringKey(NSAttributedString.Key.foregroundColor), color: adaptiveStyle.color!)
 
         // Update the trait collection and ensure the font grows.
         if #available(iOS 10.0, *) {
             textView.adaptText(forTraitCollection: UITraitCollection(preferredContentSizeCategory: UIContentSizeCategory.extraLarge.compatible))
-            BONAssert(attributes: textView.attributedText?.attributes(at: 0, effectiveRange: nil), query: { $0.pointSize }, float: expectedFont.pointSize + 2)
-            BONAssertColor(inAttributes: textView.attributedText?.attributes(at: 0, effectiveRange: nil), key: NSForegroundColorAttributeName, color: adaptiveStyle.color!)
+            BONAssert(attributes: convertFromNSAttributedStringKeyDictionary(textView.attributedText?.attributes(at: 0, effectiveRange: nil)), query: { $0.pointSize }, float: expectedFont.pointSize + 2)
+            BONAssertColor(inAttributes: convertFromNSAttributedStringKeyDictionary(textView.attributedText?.attributes(at: 0, effectiveRange: nil)), key: convertFromNSAttributedStringKey(NSAttributedString.Key.foregroundColor), color: adaptiveStyle.color!)
         }
     }
 
@@ -106,16 +106,16 @@ class UIKitBonMotTests: XCTestCase {
         button.bonMotStyleName = "adaptiveStyle"
         XCTAssertNotNil(button.bonMotStyle)
 
-        var attributes = button.attributedTitle(for: .normal)?.attributes(at: 0, effectiveRange: nil)
-        XCTAssertEqual((attributes?[NSFontAttributeName] as? UIFont)!, expectedFont)
-        BONAssertColor(inAttributes: attributes, key: NSForegroundColorAttributeName, color: adaptiveStyle.color!)
+        var attributes = convertFromNSAttributedStringKeyDictionary(button.attributedTitle(for: .normal)?.attributes(at: 0, effectiveRange: nil))
+        XCTAssertEqual((attributes?[convertFromNSAttributedStringKey(NSAttributedString.Key.font)] as? UIFont)!, expectedFont)
+        BONAssertColor(inAttributes: attributes, key: convertFromNSAttributedStringKey(NSAttributedString.Key.foregroundColor), color: adaptiveStyle.color!)
 
         // Update the trait collection and ensure the font grows.
         if #available(iOS 10.0, *) {
             button.adaptText(forTraitCollection: UITraitCollection(preferredContentSizeCategory: UIContentSizeCategory.extraLarge.compatible))
-            attributes = button.attributedTitle(for: .normal)?.attributes(at: 0, effectiveRange: nil)
+            attributes = convertFromNSAttributedStringKeyDictionary(button.attributedTitle(for: .normal)?.attributes(at: 0, effectiveRange: nil))
             BONAssert(attributes: attributes, query: { $0.pointSize }, float: expectedFont.pointSize + 2)
-            BONAssertColor(inAttributes: attributes, key: NSForegroundColorAttributeName, color: adaptiveStyle.color!)
+            BONAssertColor(inAttributes: attributes, key: convertFromNSAttributedStringKey(NSAttributedString.Key.foregroundColor), color: adaptiveStyle.color!)
         }
     }
 
@@ -128,3 +128,13 @@ class UIKitBonMotTests: XCTestCase {
 }
 
 #endif
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertFromNSAttributedStringKeyDictionary(_ input: [NSAttributedString.Key: Any]) -> [String: Any] {
+	return Dictionary(uniqueKeysWithValues: input.map {key, value in (key.rawValue, value)})
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertFromNSAttributedStringKey(_ input: NSAttributedString.Key) -> String {
+	return input.rawValue
+}

@@ -82,12 +82,23 @@ class NSAttributedStringDebugTests: XCTestCase {
         style1.lineSpacing = 1000
         let style2 = NSMutableParagraphStyle()
         style2.headIndent = 1000
-        let string1 = NSMutableAttributedString(string: "first part ", attributes: [NSParagraphStyleAttributeName: style1])
-        let string2 = NSAttributedString(string: "second part.\n", attributes: [NSParagraphStyleAttributeName: style2])
+        let string1 = NSMutableAttributedString(string: "first part ", attributes: convertToOptionalNSAttributedStringKeyDictionary([convertFromNSAttributedStringKey(NSAttributedString.Key.paragraphStyle): style1]))
+        let string2 = NSAttributedString(string: "second part.\n", attributes: convertToOptionalNSAttributedStringKeyDictionary([convertFromNSAttributedStringKey(NSAttributedString.Key.paragraphStyle): style2]))
         string1.append(string2)
-        let p1 = string1.attribute(NSParagraphStyleAttributeName, at: 0, effectiveRange: nil) as? NSParagraphStyle
-        let p2 = string1.attribute(NSParagraphStyleAttributeName, at: string1.length - 1, effectiveRange: nil) as? NSParagraphStyle
+        let p1 = string1.attribute(NSAttributedString.Key.paragraphStyle, at: 0, effectiveRange: nil) as? NSParagraphStyle
+        let p2 = string1.attribute(NSAttributedString.Key.paragraphStyle, at: string1.length - 1, effectiveRange: nil) as? NSParagraphStyle
         XCTAssertNotEqual(p1, p2)
     }
 
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertToOptionalNSAttributedStringKeyDictionary(_ input: [String: Any]?) -> [NSAttributedString.Key: Any]? {
+	guard let input = input else { return nil }
+	return Dictionary(uniqueKeysWithValues: input.map { key, value in (NSAttributedString.Key(rawValue: key), value)})
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertFromNSAttributedStringKey(_ input: NSAttributedString.Key) -> String {
+	return input.rawValue
 }
